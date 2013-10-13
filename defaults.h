@@ -151,4 +151,39 @@
   #define DEFAULT_N_ARC_CORRECTION 25
 #endif
 
+#ifdef DEFAULTS_FEST
+  // Description: Shapeoko CNC mill with three NEMA 17 stepper motors, driven by Synthetos
+  // grblShield with a 24V, 4.2A power supply.
+  #define MICROSTEPS_XY 16
+  #define STEP_REVS_XY 400
+  #define MM_PER_REV_XY (0.08*18*MM_PER_INCH) // 0.08 in belt pitch, 18 pulley teeth
+  #define MICROSTEPS_Z 16
+  #define STEP_REVS_Z 400
+  #define MM_PER_REV_Z 1.250 // 1.25 mm/rev leadscrew
+  #define DEFAULT_X_STEPS_PER_MM 1066.67
+  #define DEFAULT_Y_STEPS_PER_MM 1066.67
+  #define DEFAULT_Z_STEPS_PER_MM 1066.67
+  #define DEFAULT_STEP_PULSE_MICROSECONDS 10
+  #define DEFAULT_MM_PER_ARC_SEGMENT 0.1
+  #define DEFAULT_RAPID_FEEDRATE 300.0 // mm/min
+  #define DEFAULT_FEEDRATE 200.0
+  #define DEFAULT_ACCELERATION (10.0*60*60) // 15 mm/min^2
+  #define DEFAULT_JUNCTION_DEVIATION 0.05 // mm
+  #define DEFAULT_STEPPING_INVERT_MASK 0 
+  #define DEFAULT_REPORT_INCHES 0 // false
+  #define DEFAULT_AUTO_START 1 // true
+  #define DEFAULT_INVERT_ST_ENABLE 0 // false
+  #define DEFAULT_HARD_LIMIT_ENABLE 0  // false
+  #define DEFAULT_HOMING_ENABLE 1  // false
+  #define DEFAULT_HOMING_DIR_MASK 0xFF // move positive dir
+  #define DEFAULT_HOMING_RAPID_FEEDRATE 200.0 // mm/min
+  #define DEFAULT_HOMING_FEEDRATE 200.0 // mm/min
+  #define DEFAULT_HOMING_DEBOUNCE_DELAY 100 // msec (0-65k)
+  #define DEFAULT_HOMING_PULLOFF 1.0 // mm
+  #define DEFAULT_STEPPER_IDLE_LOCK_TIME 255 // msec (0-255)
+  #define DEFAULT_DECIMAL_PLACES 3
+  #define DEFAULT_N_ARC_CORRECTION 25
+#endif
+
+
 #endif

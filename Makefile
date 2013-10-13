@@ -41,7 +41,7 @@ OBJECTS    = main.o motion_control.o gcode.o spindle_control.o coolant_control.o
 
 # Tune the lines below only if you know what you are doing:
 
-AVRDUDE = avrdude $(PROGRAMMER) -p $(DEVICE) -B 10 -F
+AVRDUDE = avrdude $(PROGRAMMER) -p $(DEVICE) -B 1
 COMPILE = avr-gcc -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -I. -ffunction-sections
 
 # symbolic targets:
@@ -68,7 +68,7 @@ fuse:
 	$(AVRDUDE) $(FUSES)
 
 # Xcode uses the Makefile targets "", "clean" and "install"
-install: flash fuse
+install: flash
 
 # if you use a bootloader, change the command below appropriately:
 load: all

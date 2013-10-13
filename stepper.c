@@ -87,8 +87,10 @@ void st_wake_up()
   // Enable steppers by resetting the stepper disable port
   if (bit_istrue(settings.flags,BITFLAG_INVERT_ST_ENABLE)) { 
     STEPPERS_DISABLE_PORT |= (1<<STEPPERS_DISABLE_BIT); 
+    STEPPERS_DISABLE_Z_PORT |= (1<<STEPPERS_DISABLE_Z_BIT); 
   } else { 
     STEPPERS_DISABLE_PORT &= ~(1<<STEPPERS_DISABLE_BIT);
+    STEPPERS_DISABLE_Z_PORT &= ~(1<<STEPPERS_DISABLE_Z_BIT);
   }
   if (sys.state == STATE_CYCLE) {
     // Initialize stepper output bits
@@ -120,8 +122,10 @@ void st_go_idle()
     delay_ms(settings.stepper_idle_lock_time);
     if (bit_istrue(settings.flags,BITFLAG_INVERT_ST_ENABLE)) { 
       STEPPERS_DISABLE_PORT &= ~(1<<STEPPERS_DISABLE_BIT); 
+      STEPPERS_DISABLE_Z_PORT &= ~(1<<STEPPERS_DISABLE_Z_BIT); 
     } else { 
       STEPPERS_DISABLE_PORT |= (1<<STEPPERS_DISABLE_BIT); 
+      STEPPERS_DISABLE_Z_PORT |= (1<<STEPPERS_DISABLE_Z_BIT); 
     }   
   }
 }
@@ -147,15 +151,44 @@ inline static uint8_t iterate_trapezoid_cycle_counter()
 ISR(TIMER1_COMPA_vect)
 {        
   if (busy) { return; } // The busy-flag is used to avoid reentering this interrupt
-  
+ 
+  // CHANGED: instead of setting pins in a single line, we have to check
+  // out_bits and set each pin individually
+  //
   // Set the direction pins a couple of nanoseconds before we step the steppers
-  STEPPING_PORT = (STEPPING_PORT & ~DIRECTION_MASK) | (out_bits & DIRECTION_MASK);
+  //STEPPING_PORT = (STEPPING_PORT & ~DIRECTION_MASK) | (out_bits & DIRECTION_MASK);
+
+  if (out_bits & X_DIRECTION_MASK)
+      STEPPING_DIR_PORT_X |= (1 << STEPPING_DIR_X);
+  else
+      STEPPING_DIR_PORT_X &= ~(1 << STEPPING_DIR_X);
+
+  if (out_bits & Y_DIRECTION_MASK)
+      STEPPING_DIR_PORT_Y |= (1 << STEPPING_DIR_Y);
+    else
+      STEPPING_DIR_PORT_Y &= ~(1 << STEPPING_DIR_Y);
+
+  if (out_bits & Z_DIRECTION_MASK)
+      STEPPING_DIR_PORT_Z |= (1 << STEPPING_DIR_Z);
+ else
+      STEPPING_DIR_PORT_Z &= ~(1 << STEPPING_DIR_Z);
+
   // Then pulse the stepping pins
   #ifdef STEP_PULSE_DELAY
-    step_bits = (STEPPING_PORT & ~STEP_MASK) | out_bits; // Store out_bits to prevent overwriting.
-  #else  // Normal operation
-    STEPPING_PORT = (STEPPING_PORT & ~STEP_MASK) | out_bits;
-  #endif
+    #error STEP_PULSE_DELAY does not work with pins not on same ports
+  #endif // Normal operation
+
+    //STEPPING_PORT = (STEPPING_PORT & ~STEP_MASK) | out_bits;
+
+    if (out_bits & X_STEP_MASK)
+        STEPPING_STEP_PORT_X |= (1 << STEPPING_STEP_X);
+
+    if (out_bits & Y_STEP_MASK)
+        STEPPING_STEP_PORT_Y |= (1 << STEPPING_STEP_Y);
+
+    if (out_bits & Z_STEP_MASK)
+        STEPPING_STEP_PORT_Z |= (1 << STEPPING_STEP_Z);
+
   // Enable step pulse reset timer so that The Stepper Port Reset Interrupt can reset the signal after
   // exactly settings.pulse_microseconds microseconds, independent of the main Timer1 prescaler.
   TCNT2 = step_pulse_time; // Reload timer counter
@@ -321,11 +354,17 @@ ISR(TIMER1_COMPA_vect)
 ISR(TIMER2_OVF_vect)
 {
   // Reset stepping pins (leave the direction pins)
-  STEPPING_PORT = (STEPPING_PORT & ~STEP_MASK) | (settings.invert_mask & STEP_MASK); 
+  //STEPPING_PORT = (STEPPING_PORT & ~STEP_MASK) | (settings.invert_mask & STEP_MASK); 
+  
+  STEPPING_STEP_PORT_X &= ~(1 << STEPPING_STEP_X);
+  STEPPING_STEP_PORT_Y &= ~(1 << STEPPING_STEP_Y);
+  STEPPING_STEP_PORT_Z &= ~(1 << STEPPING_STEP_Z);
+
   TCCR2B = 0; // Disable Timer2 to prevent re-entering this interrupt when it's not needed. 
 }
 
 #ifdef STEP_PULSE_DELAY
+  #error STEP_PULSE_DELAY will not work correctly.
   // This interrupt is used only when STEP_PULSE_DELAY is enabled. Here, the step pulse is
   // initiated after the STEP_PULSE_DELAY time period has elapsed. The ISR TIMER2_OVF interrupt
   // will then trigger after the appropriate settings.pulse_microseconds, as in normal operation.
@@ -350,9 +389,19 @@ void st_reset()
 void st_init()
 {
   // Configure directions of interface pins
-  STEPPING_DDR |= STEPPING_MASK;
-  STEPPING_PORT = (STEPPING_PORT & ~STEPPING_MASK) | settings.invert_mask;
+  //STEPPING_DDR |= STEPPING_MASK;
+  STEPPING_STEP_DDR_X |= (1<<STEPPING_STEP_X);
+  STEPPING_STEP_DDR_Y |= (1<<STEPPING_STEP_Y);
+  STEPPING_STEP_DDR_Z |= (1<<STEPPING_STEP_Z);
+
+  STEPPING_DIR_DDR_X  |= (1<<STEPPING_DIR_X);
+  STEPPING_DIR_DDR_Y  |= (1<<STEPPING_DIR_Y);
+  STEPPING_DIR_DDR_Z  |= (1<<STEPPING_DIR_Z);
+
+  //STEPPING_PORT = (STEPPING_PORT & ~STEPPING_MASK) | settings.invert_mask;
   STEPPERS_DISABLE_DDR |= 1<<STEPPERS_DISABLE_BIT;
+
+  STEPPERS_DISABLE_Z_DDR |= 1<<STEPPERS_DISABLE_Z_BIT;
 
   // waveform generation = 0100 = CTC
   TCCR1B &= ~(1<<WGM13);

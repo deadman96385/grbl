@@ -78,6 +78,39 @@ ISR(LIMIT_INT_vect)
   }
 }
 
+static void homing_cycle_set_bits(uint8_t bits) {
+
+    if (bits & X_STEP_MASK)
+        STEPPING_STEP_PORT_X |= (1<<STEPPING_STEP_X);
+    else
+        STEPPING_STEP_PORT_X &= ~(1<<STEPPING_STEP_X);
+
+    if (bits & Y_STEP_MASK)
+        STEPPING_STEP_PORT_Y |= (1<<STEPPING_STEP_Y);
+    else
+        STEPPING_STEP_PORT_Y &= ~(1<<STEPPING_STEP_Y);
+
+    if (bits & Z_STEP_MASK)
+        STEPPING_STEP_PORT_Z |= (1<<STEPPING_STEP_Z);
+    else
+        STEPPING_STEP_PORT_Z &= ~(1<<STEPPING_STEP_Z);
+    
+    if (bits & X_DIRECTION_MASK)
+        STEPPING_DIR_PORT_X |= (1<<STEPPING_DIR_X);
+    else
+        STEPPING_DIR_PORT_X &= ~(1<<STEPPING_DIR_X);
+ 
+    if (bits & Y_DIRECTION_MASK)
+        STEPPING_DIR_PORT_Y |= (1<<STEPPING_DIR_Y);
+     else
+        STEPPING_DIR_PORT_Y &= ~(1<<STEPPING_DIR_Y);
+ 
+    if (bits & Z_DIRECTION_MASK)
+        STEPPING_DIR_PORT_Z |= (1<<STEPPING_DIR_Z);
+    else
+        STEPPING_DIR_PORT_Z &= ~(1<<STEPPING_DIR_Z);
+ 
+}
 
 // Moves all specified axes in same specified direction (positive=true, negative=false)
 // and at the homing rate. Homing is a special motion case, where there is only an 
@@ -190,9 +223,15 @@ static void homing_cycle(uint8_t cycle_mask, int8_t pos_dir, bool invert_pin, fl
     if (!(cycle_mask) || (sys.execute & EXEC_RESET)) { return; }
         
     // Perform step.
-    STEPPING_PORT = (STEPPING_PORT & ~STEP_MASK) | (out_bits & STEP_MASK);
+    // STEPPING_PORT = (STEPPING_PORT & ~STEP_MASK) | (out_bits & STEP_MASK);
+    //I feel really bad to change a single line of well-written code to a
+    //convulted half-page of if's  :(
+    //
+    homing_cycle_set_bits(out_bits);
+    
     delay_us(settings.pulse_microseconds);
-    STEPPING_PORT = out_bits0;
+    //STEPPING_PORT = out_bits0;
+    homing_cycle_set_bits(out_bits0);
     delay_us(step_delay);
     
     // Track and set the next step delay, if required. This routine uses another Bresenham
