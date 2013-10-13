@@ -25,28 +25,51 @@
 #ifndef pin_map_h
 #define pin_map_h
 
-#ifdef PIN_MAP_ARDUINO_UNO // AVR 328p, Officially supported by Grbl.
+//#ifdef PIN_MAP_ARDUINO_UNO // AVR 328p, Officially supported by Grbl.
+//don't care about anything except Sanguinololou
+// Serial port pins
+#define SERIAL_RX USART0_RX_vect
+#define SERIAL_UDRE USART0_UDRE_vect
 
-  // Serial port pins
-  #define SERIAL_RX USART_RX_vect
-  #define SERIAL_UDRE USART_UDRE_vect
+#define STEPPING_STEP_DDR_X       DDRD
+#define STEPPING_STEP_PORT_X      PORTD
+#define STEPPING_STEP_X           PD7
 
-  // NOTE: All step bit and direction pins must be on the same port.
-  #define STEPPING_DDR       DDRD
-  #define STEPPING_PORT      PORTD
-  #define X_STEP_BIT         2  // Uno Digital Pin 2
-  #define Y_STEP_BIT         3  // Uno Digital Pin 3
-  #define Z_STEP_BIT         4  // Uno Digital Pin 4
-  #define X_DIRECTION_BIT    5  // Uno Digital Pin 5
-  #define Y_DIRECTION_BIT    6  // Uno Digital Pin 6
-  #define Z_DIRECTION_BIT    7  // Uno Digital Pin 7
+#define STEPPING_DIR_DDR_X        DDRC
+#define STEPPING_DIR_PORT_X       PORTC
+#define STEPPING_DIR_X            PC5
+
+#define STEPPING_STEP_DDR_Y       DDRC
+#define STEPPING_STEP_PORT_Y      PORTC
+#define STEPPING_STEP_Y           PC6
+
+#define STEPPING_DIR_DDR_Y        DDRC
+#define STEPPING_DIR_PORT_Y       PORTC
+#define STEPPING_DIR_Y            PC7
+
+#define STEPPING_STEP_DDR_Z       DDRB
+#define STEPPING_STEP_PORT_Z      PORTB
+#define STEPPING_STEP_Z           PB3
+
+#define STEPPING_DIR_DDR_Z        DDRB
+#define STEPPING_DIR_PORT_Z       PORTB
+#define STEPPING_DIR_Z            PB2
+
+
+  //leave these, since there are bit-packed variables in there 
+  #define X_STEP_BIT         0  // Uno Digital Pin 2
+  #define Y_STEP_BIT         1  // Uno Digital Pin 3
+  #define Z_STEP_BIT         2  // Uno Digital Pin 4
+  #define X_DIRECTION_BIT    3  // Uno Digital Pin 5
+  #define Y_DIRECTION_BIT    4  // Uno Digital Pin 6
+  #define Z_DIRECTION_BIT    5  // Uno Digital Pin 7
   #define STEP_MASK ((1<<X_STEP_BIT)|(1<<Y_STEP_BIT)|(1<<Z_STEP_BIT)) // All step bits
   #define DIRECTION_MASK ((1<<X_DIRECTION_BIT)|(1<<Y_DIRECTION_BIT)|(1<<Z_DIRECTION_BIT)) // All direction bits
   #define STEPPING_MASK (STEP_MASK | DIRECTION_MASK) // All stepping-related bits (step/direction)
 
-  #define STEPPERS_DISABLE_DDR    DDRB
-  #define STEPPERS_DISABLE_PORT   PORTB
-  #define STEPPERS_DISABLE_BIT    0  // Uno Digital Pin 8
+  #define STEPPERS_DISABLE_DDR    DDRD
+  #define STEPPERS_DISABLE_PORT   PORTD
+  #define STEPPERS_DISABLE_BIT    PD6
   #define STEPPERS_DISABLE_MASK (1<<STEPPERS_DISABLE_BIT)
 
   // NOTE: All limit bit pins must be on the same port
@@ -94,7 +117,7 @@
   #define PINOUT_PCMSK     PCMSK1 // Pin change interrupt register
   #define PINOUT_MASK ((1<<PIN_RESET)|(1<<PIN_FEED_HOLD)|(1<<PIN_CYCLE_START))
   
-#endif
+//#endif
 
 
 #ifdef PIN_MAP_ARDUINO_MEGA_2560 // Unsupported. Doesn't work. Supplied by @elmom.
