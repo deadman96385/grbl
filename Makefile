@@ -30,7 +30,7 @@
 
 DEVICE     ?= atmega1284p
 CLOCK      = 16000000
-PROGRAMMER ?= -c usbasp
+PROGRAMMER ?= -c stk500v1
 OBJECTS    = main.o motion_control.o gcode.o spindle_control.o coolant_control.o serial.o \
              protocol.o stepper.o eeprom.o settings.o planner.o nuts_bolts.o limits.o \
              print.o report.o

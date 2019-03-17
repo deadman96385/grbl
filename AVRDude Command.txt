@@ -1,0 +1,1 @@
+c:\arduino\hardware\tools\avr\bin\avrdude -Cc:\arduino\hardware\tools\avr\etc\avrdude.conf -v -v -v -v -patmega1284p -cstk500v1 -P\\.\COM5 -b57600 -D -Uflash:w:c:\grbl.hex:i
